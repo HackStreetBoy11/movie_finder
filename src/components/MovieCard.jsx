@@ -1,24 +1,30 @@
 import React from 'react'
 
-function MovieCard({ movie: { title, vote_average, poster_path, release_date, original_language } }) {
+function MovieCard({ movie: { Title, Type, Poster, Year, imdbID } }) {
+    // Handle missing posters gracefully
+    const posterSrc = Poster && Poster !== "N/A" ? Poster : "/no-movie.jpg"; // Make sure this path exists in /public folder
+
     return (
         <div className='movie-card'>
-            <img src={poster_path ? `https://image.tmdb.org/t/p/w500/${poster_path}` : 'no-movie.jpg '}
-                alt={title}
-            />
+            <a href={`https://www.imdb.com/title/${imdbID}`} target="_blank" rel="noopener noreferrer">
+                <img
+                    src={posterSrc}
+                    alt={Title}
+                    onError={(e) => (e.target.src = "/no-movie.jpg")} // fallback if image fails to load
+                />
+            </a>
+
             <div className='mt-4'>
-                <h3>{title} </h3>
+                <h3>{Title}</h3>
 
                 <div className='content'>
                     <div className="rating">
                         <img src="star.svg" alt="Star Icon" />
-                        <p>{vote_average ? vote_average.toFixed(1) : 'N/A'}</p>
+                        <p>{Type || 'N/A'}</p>
                     </div>
 
                     <span>•</span>
-                    <p className='lang'>{original_language}</p>
-                    <span>•</span>
-                    <p className='year'>{release_date ? release_date.split('-')[0] : 'N/A'}</p>
+                    <p className='year'>{Year || 'N/A'}</p>
                 </div>
             </div>
         </div>

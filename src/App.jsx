@@ -2,20 +2,22 @@ import React, { useState, useEffect } from 'react'
 import Search from './components/Search'
 import Spinner from './components/Spinner';
 import MovieCard from './components/MovieCard';
-const API_BASE_URL = 'https://api.themoviedb.org/3'
-const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
-
 import { useDebounce } from 'react-use';
 import { getTrendingMovies, updateSearchCount } from './appWrite';
+// const API_BASE_URL = 'https://api.themoviedb.org/3'
+// const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
+const API_BASE_URL = 'http://www.omdbapi.com/'
+const API_KEY = import.meta.env.VITE_OMDB_API_KEY;
 
 
-const API_OPTIONS = {
-  method: 'GET',
-  headers: {
-    accept: 'application/json',
-    Authorization: `Bearer ${API_KEY}`
-  }
-}
+
+// const API_OPTIONS = {
+//   method: 'GET',
+//   headers: {
+//     accept: 'application/json',
+//     Authorization: `Bearer ${API_KEY}`
+//   }
+// }
 
 function App() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -34,29 +36,35 @@ function App() {
     setErrorMessage('');
 
     try {
-      const endpoint = query ? `${API_BASE_URL}/search/movie?query=${encodeURIComponent(query)}`
-        : `${API_BASE_URL}/discover/movie?sort_by=popularity.desc`;
-      const response = await fetch(endpoint, API_OPTIONS);
-
+      const endpoint = query ? `${API_BASE_URL}?apikey=${API_KEY}&s=${encodeURIComponent(query)}` ///search/movie?query=${encodeURIComponent(query)}`
+        : `${API_BASE_URL}?apikey=${API_KEY}&s=popular` // /discover/movie?sort_by=popularity.desc`;
+      // const response = await fetch(endpoint, API_OPTIONS);
+      const response = await fetch(endpoint)
       if (!response.ok) {
-        throw new Error('Failed to fetch movies');
+        throw new Error('Failed to fetch movies yoyo');
       }
       const data = await response.json();
+      console.log(data);
 
       if (data.Response === 'False') {
-        setErrorMessage(data.Error || 'Failed to fetch movies');
+        setErrorMessage(data.Error || 'Failed to fetch movies yoyo ');
         setMovieList([]);
         return;
       }
-      setMovieList(data.results || [])
 
-      if (query && data.results.length > 0) {
-        await updateSearchCount(query, data.results[0]);
+      //setMovieList(data.results || [])
+      // OMDB returns movies inside data.Search
+      setMovieList(data.Search || [])
+      // if (query && data.results.length > 0) {
+      //   await updateSearchCount(query, data.results[0]);
+      // }
+      if (query && data.Search && data.Search.length > 0) {
+        await updateSearchCount(query, data.Search[0])
       }
     }
     catch (error) {
-      console.log(`Error fetching movies: ${error}`);
-      setErrorMessage('Error fetching movies. Please try again later.');
+      console.log(`Error fetching movies: yoyo ${error}`);
+      setErrorMessage('Error fetching movies. Please try again later. yoyo');
     } finally {
       setIsLoading(false);
     }
@@ -67,7 +75,7 @@ function App() {
       const movies = await getTrendingMovies();
       setTrendingMovies(movies);
     } catch (error) {
-      console.log(`Error fetching trending movies: ${error}`);
+      console.log(`Error fetching trending movies: yoyo ${error}`);
 
     }
   }
@@ -99,7 +107,7 @@ function App() {
             <ul>
               {trendingMovies.map((movie, index) => (
                 <li key={movie.$id}>
-                  <p>{index +1}</p>
+                  <p>{index + 1}</p>
                   <img src={movie.poster_url} alt={movie.title} />
                 </li>
               ))}
